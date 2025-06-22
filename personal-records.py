@@ -17,6 +17,7 @@ def get_icon_for_record(activity_name):
         "Most Steps in a Week": "🚶",
         "Most Steps in a Month": "📅",
         "Longest Goal Streak": "✔️",
+        "Half Marathon": "🏅",
         "Other": "🏅"
     }
     return icon_map.get(activity_name, "🏅")  # Default to "Other" icon if not found
@@ -61,7 +62,8 @@ def format_garmin_value(value, activity_type, typeId):
         minutes = total_seconds // 60
         seconds = total_seconds % 60
         formatted_value = f"{minutes}:{seconds:02d}"
-        total_pseconds = total_seconds / 1.60934  # Divide by 1.60934 to get pace per km
+        # total_pseconds = total_seconds / 1.60934  # Divide by 1.60934 to get pace per km
+        total_pseconds = total_seconds
         pminutes = int(total_pseconds // 60)      # Convert to integer
         pseconds = int(total_pseconds % 60)       # Convert to integer
         formatted_pace = f"{pminutes}:{pseconds:02d} /km"
