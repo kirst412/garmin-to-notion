@@ -45,7 +45,7 @@ jobs:
           NOTION_SLEEP_DB_ID: ${{ secrets.NOTION_SLEEP_DB_ID }}
           TZ: 'US/Eastern'
         run: |
+          python sleep-data.py
           python personal-records.py
           python garmin-activities.py
           python daily-steps.py
-          python sleep-data.py
