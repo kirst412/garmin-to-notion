@@ -14,6 +14,8 @@ def get_all_daily_steps(garmin):
     daily_steps = []
     for d in daterange:
         daily_steps += garmin.get_daily_steps(d.isoformat(), d.isoformat())
+    print(daily_steps)
+    print(type(daily_steps))
     return daily_steps
 
 def daily_steps_exist(client, database_id, activity_date):
