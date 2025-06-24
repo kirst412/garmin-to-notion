@@ -27,10 +27,11 @@ ACTIVITY_ICONS = {
     "Treadmill Running": "https://img.icons8.com/?size=100&id=9794&format=png&color=000000",
     "Walking": "https://img.icons8.com/?size=100&id=9807&format=png&color=000000",
     "Yoga": "https://img.icons8.com/?size=100&id=9783&format=png&color=000000",
+    "Disc Golf": "https://img.icons8.com/?size=100&id=9783&format=png&color=000000"
     # Add more mappings as needed
 }
 
-def get_all_activities(garmin, limit=1000):
+def get_all_activities(garmin, limit=100):
     return garmin.get_activities(0, limit)
 
 def format_activity_type(activity_type, activity_name=""):
@@ -49,7 +50,8 @@ def format_activity_type(activity_type, activity_name=""):
         "Indoor Rowing": "Rowing",
         "Speed Walking": "Walking",
         "Strength Training": "Strength",
-        "Treadmill Running": "Running"
+        "Treadmill Running": "Running",
+        "Cincinnati Disc Golf @ Burnet Woods": "Disc Golf"
     }
 
     # Special replacement for Rowing V2
@@ -75,9 +77,6 @@ def format_activity_type(activity_type, activity_name=""):
         return "Stretching", "Stretching"
     
     return activity_type, activity_subtype
-
-def format_entertainment(activity_name):
-    return activity_name.replace('ENTERTAINMENT', 'Netflix')
 
 def format_training_message(message):
     messages = {
@@ -172,8 +171,8 @@ def activity_needs_update(existing_activity, new_activity):
 def create_activity(client, database_id, activity):
 
     # Create a new activity in the Notion database
-    activity_date = activity.get('startTimeGMT')
-    activity_name = format_entertainment(activity.get('activityName', 'Unnamed Activity'))
+    activity_date = activity.get('startTimeEST')
+    activity_name = activity.get('activityName')
     activity_type, activity_subtype = format_activity_type(
         activity.get('activityType', {}).get('typeKey', 'Unknown'),
         activity_name
@@ -187,10 +186,10 @@ def create_activity(client, database_id, activity):
         "Activity Type": {"select": {"name": activity_type}},
         "Subactivity Type": {"select": {"name": activity_subtype}},
         "Activity Name": {"title": [{"text": {"content": activity_name}}]},
-        "Distance (km)": {"number": round(activity.get('distance', 0) / 1000, 2)},
+        "Distance (mi)": {"number": round(activity.get('distance', 0), 2)},
         "Duration (min)": {"number": round(activity.get('duration', 0) / 60, 2)},
         "Calories": {"number": round(activity.get('calories', 0))},
-        "Avg Pace": {"rich_text": [{"text": {"content": format_pace(activity.get('averageSpeed', 0))}}]},
+        "Avg Pace": {"rich_text": [{"text": {"content": activity.get('averageSpeed', 0)}}]},
         "Avg Power": {"number": round(activity.get('avgPower', 0), 1)},
         "Max Power": {"number": round(activity.get('maxPower', 0), 1)},
         "Training Effect": {"select": {"name": format_training_effect(activity.get('trainingEffectLabel', 'Unknown'))}},
@@ -227,10 +226,10 @@ def update_activity(client, existing_activity, new_activity):
     properties = {
         "Activity Type": {"select": {"name": activity_type}},
         "Subactivity Type": {"select": {"name": activity_subtype}},
-        "Distance (km)": {"number": round(new_activity.get('distance', 0) / 1000, 2)},
+        "Distance (mi)": {"number": round(new_activity.get('distance', 0), 2)},
         "Duration (min)": {"number": round(new_activity.get('duration', 0) / 60, 2)},
         "Calories": {"number": round(new_activity.get('calories', 0))},
-        "Avg Pace": {"rich_text": [{"text": {"content": format_pace(new_activity.get('averageSpeed', 0))}}]},
+        "Avg Pace": {"rich_text": [{"text": {"content": new_activity.get('averageSpeed', 0)}}]},
         "Avg Power": {"number": round(new_activity.get('avgPower', 0), 1)},
         "Max Power": {"number": round(new_activity.get('maxPower', 0), 1)},
         "Training Effect": {"select": {"name": format_training_effect(new_activity.get('trainingEffectLabel', 'Unknown'))}},
@@ -271,8 +270,8 @@ def main():
 
     # Process all activities
     for activity in activities:
-        activity_date = activity.get('startTimeGMT')
-        activity_name = format_entertainment(activity.get('activityName', 'Unnamed Activity'))
+        activity_date = activity.get('startTimeEST')
+        activity_name = activity.get('activityName', 'Unnamed Activity')
         activity_type, activity_subtype = format_activity_type(
             activity.get('activityType', {}).get('typeKey', 'Unknown'),
             activity_name
