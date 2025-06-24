@@ -171,7 +171,7 @@ def activity_needs_update(existing_activity, new_activity):
 def create_activity(client, database_id, activity):
 
     # Create a new activity in the Notion database
-    activity_date = activity.get('startDate')
+    activity_date = activity.get('startTime')
     activity_name = activity.get('activityName')
     activity_type, activity_subtype = format_activity_type(
         activity.get('activityType', {}).get('typeKey', 'Unknown'),
@@ -270,7 +270,7 @@ def main():
 
     # Process all activities
     for activity in activities:
-        activity_date = activity.get('startDate')
+        activity_date = activity.get('startTime')
         print(activity_date)
         activity_name = activity.get('activityName', 'Unnamed Activity')
         activity_type, activity_subtype = format_activity_type(
