@@ -98,14 +98,14 @@ def format_training_message(message):
 def format_training_effect(trainingEffect_label):
     return trainingEffect_label.replace('_', ' ').title()
 
-def format_pace(average_speed):
-    if average_speed > 0:
-        pace_min_km = 1000 / (average_speed * 60)  # Convert to min/km
-        minutes = int(pace_min_km)
-        seconds = int((pace_min_km - minutes) * 60)
-        return f"{minutes}:{seconds:02d} min/km"
-    else:
-        return ""
+# def format_pace(average_speed):
+#     if average_speed > 0:
+#         pace_min_km = 1000 / (average_speed * 60)  # Convert to min/km
+#         minutes = int(pace_min_km)
+#         seconds = int((pace_min_km - minutes) * 60)
+#         return f"{minutes}:{seconds:02d} min/km"
+#     else:
+#         return ""
     
 def activity_exists(client, database_id, activity_date, activity_type, activity_name):
 
@@ -151,10 +151,10 @@ def activity_needs_update(existing_activity, new_activity):
     )
     
     return (
-        existing_props['Distance (km)']['number'] != round(new_activity.get('distance', 0) / 1000, 2) or
+        existing_props['Distance (mi)']['number'] != round(new_activity.get('distance', 0), 2) or
         existing_props['Duration (min)']['number'] != round(new_activity.get('duration', 0) / 60, 2) or
         existing_props['Calories']['number'] != round(new_activity.get('calories', 0)) or
-        existing_props['Avg Pace']['rich_text'][0]['text']['content'] != format_pace(new_activity.get('averageSpeed', 0)) or
+        existing_props['Avg Pace']['rich_text'][0]['text']['content'] != new_activity.get('averageSpeed', 0) or
         existing_props['Avg Power']['number'] != round(new_activity.get('avgPower', 0), 1) or
         existing_props['Max Power']['number'] != round(new_activity.get('maxPower', 0), 1) or
         existing_props['Training Effect']['select']['name'] != format_training_effect(new_activity.get('trainingEffectLabel', 'Unknown')) or
@@ -187,10 +187,10 @@ def create_activity(client, database_id, activity):
         "Activity Type": {"select": {"name": activity_type}},
         "Subactivity Type": {"select": {"name": activity_subtype}},
         "Activity Name": {"title": [{"text": {"content": activity_name}}]},
-        "Distance (km)": {"number": round(activity.get('distance', 0) / 1000, 2)},
+        "Distance (mi)": {"number": round(activity.get('distance', 0), 2)},
         "Duration (min)": {"number": round(activity.get('duration', 0) / 60, 2)},
         "Calories": {"number": round(activity.get('calories', 0))},
-        "Avg Pace": {"rich_text": [{"text": {"content": format_pace(activity.get('averageSpeed', 0))}}]},
+        "Avg Pace": {"rich_text": [{"text": {"content": activity.get('averageSpeed', 0)}}]},
         "Avg Power": {"number": round(activity.get('avgPower', 0), 1)},
         "Max Power": {"number": round(activity.get('maxPower', 0), 1)},
         "Training Effect": {"select": {"name": format_training_effect(activity.get('trainingEffectLabel', 'Unknown'))}},
@@ -227,10 +227,10 @@ def update_activity(client, existing_activity, new_activity):
     properties = {
         "Activity Type": {"select": {"name": activity_type}},
         "Subactivity Type": {"select": {"name": activity_subtype}},
-        "Distance (km)": {"number": round(new_activity.get('distance', 0) / 1000, 2)},
+        "Distance (mi)": {"number": round(new_activity.get('distance', 0), 2)},
         "Duration (min)": {"number": round(new_activity.get('duration', 0) / 60, 2)},
         "Calories": {"number": round(new_activity.get('calories', 0))},
-        "Avg Pace": {"rich_text": [{"text": {"content": format_pace(new_activity.get('averageSpeed', 0))}}]},
+        "Avg Pace": {"rich_text": [{"text": {"content": new_activity.get('averageSpeed', 0)}}]},
         "Avg Power": {"number": round(new_activity.get('avgPower', 0), 1)},
         "Max Power": {"number": round(new_activity.get('maxPower', 0), 1)},
         "Training Effect": {"select": {"name": format_training_effect(new_activity.get('trainingEffectLabel', 'Unknown'))}},
