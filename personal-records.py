@@ -1,6 +1,7 @@
 from datetime import date, datetime
 from garminconnect import Garmin
 from notion_client import Client
+from dotenv import load_dotenv
 import os
 
 def get_icon_for_record(activity_name):
@@ -9,6 +10,7 @@ def get_icon_for_record(activity_name):
         "1mi": "⚡",
         "5K": "👟",
         "10K": "⭐",
+        "Half Marathon": "🏃",
         "Longest Run": "🏃",
         "Longest Ride": "🚴",
         "Total Ascent": "🚵",
@@ -28,6 +30,7 @@ def get_cover_for_record(activity_name):
         "1mi": "https://images.unsplash.com/photo-1638183395699-2c0db5b6afbb?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=4800",
         "5K": "https://images.unsplash.com/photo-1571008887538-b36bb32f4571?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=4800",
         "10K": "https://images.unsplash.com/photo-1529339944280-1a37d3d6fa8c?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=4800",
+        "Half Marathon": "https://images.unsplash.com/photo-1529339944280-1a37d3d6fa8c?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=4800",
         "Longest Run": "https://images.unsplash.com/photo-1532383282788-19b341e3c422?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=4800",
         "Longest Ride": "https://images.unsplash.com/photo-1471506480208-91b3a4cc78be?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=4800",
         "Max Avg Power (20 min)": "https://images.unsplash.com/photo-1591741535018-d042766c62eb?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w2MzkyMXwwfDF8c2VhcmNofDJ8fHNwaW5uaW5nfGVufDB8fHx8MTcyNjM1Mzc0Mnww&ixlib=rb-4.0.3&q=80&w=4800",
@@ -96,6 +99,23 @@ def format_garmin_value(value, activity_type, typeId):
         pseconds = total_pseconds % 60
         formatted_pace = f"{pminutes}:{pseconds:02d} /km"
         return formatted_value, formatted_pace
+    
+    if typeId == 5:  # Half Marathon
+        # Round to the nearest second
+        total_seconds = round(value)
+        hours = total_seconds // 3600
+        minutes = (total_seconds % 3600) // 60
+        seconds = total_seconds % 60
+        if hours > 0:
+            formatted_value = f"{hours}:{minutes:02d}:{seconds:02d}"
+        else:
+            formatted_value = f"{minutes}:{seconds:02d}"
+        total_pseconds = total_seconds // 10  # Divide by 10km
+        phours = total_pseconds // 3600
+        pminutes = (total_pseconds % 3600) // 60
+        pseconds = total_pseconds % 60
+        formatted_pace = f"{pminutes}:{pseconds:02d} /km"
+        return formatted_value, formatted_pace
 
     if typeId in [7, 8]:  # Longest Run, Longest Ride
         value_km = value / 1000
@@ -147,6 +167,7 @@ def replace_activity_name_by_typeId(typeId):
         2: "1mi",
         3: "5K",
         4: "10K",
+        5: "Half Marathon",
         7: "Longest Run",
         8: "Longest Ride",
         9: "Total Ascent",
@@ -237,6 +258,10 @@ def write_new_record(client, database_id, activity_date, activity_type, activity
         print(f"Error writing new record: {e}")
 
 def main():
+
+    print('load dotenv...')
+    load_dotenv()
+
     garmin_email = os.getenv("GARMIN_EMAIL")
     garmin_password = os.getenv("GARMIN_PASSWORD")
     notion_token = os.getenv("NOTION_TOKEN")
