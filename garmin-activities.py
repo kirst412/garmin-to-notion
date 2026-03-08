@@ -215,6 +215,20 @@ def create_activity(client, database_id, activity):
         page["icon"] = {"type": "external", "external": {"url": icon_url}}
     
     client.pages.create(**page)
+
+def get_existing_activities(client, database_id):
+    query = client.databases.query(database_id=database_id)
+    existing_activities = {}
+
+    # Store activities in a dictionary for easy lookup
+    for result in query['results']:
+        activity_name = result['properties']['Activity Name']['title'][0]['text']['content']
+        activity_date = result['properties']['Date']['date']['start']
+        activity_type = result['properties']['Activity Type']['select']['name']
+
+        existing_activities[(activity_date, activity_name, activity_type)] = result
+
+    return existing_activities
     
 def update_activity(client, existing_activity, new_activity):
 
@@ -269,8 +283,13 @@ def main():
     garmin = Garmin(garmin_email, garmin_password)
     garmin.login()
     client = Client(auth=notion_token)
+
+    # Fetch all existing activities from Notion once
+    print('Fetching existing activities from notion...')
+    existing_activities = get_existing_activities(client, database_id)
     
     # Get all activities
+    print('Fetching all activities from garmin...')
     activities = get_all_activities(garmin)
 
     # Process all activities
@@ -282,16 +301,15 @@ def main():
             activity_name
         )
         
-        # Check if activity already exists in Notion
-        existing_activity = activity_exists(client, database_id, activity_date, activity_type, activity_name)
-        
-        if existing_activity:
+        # Check if activity already exists in the fetched activities
+        if (activity_date, activity_name, activity_type) in existing_activities:
+            existing_activity = existing_activities[(activity_date, activity_name, activity_type)]
             if activity_needs_update(existing_activity, activity):
                 update_activity(client, existing_activity, activity)
-                # print(f"Updated: {activity_type} - {activity_name}")
+                print(f"Updated: {activity_type} - {activity_name}")
         else:
             create_activity(client, database_id, activity)
-            # print(f"Created: {activity_type} - {activity_name}")
+            print(f"Created: {activity_type} - {activity_name}")
 
 if __name__ == '__main__':
     main()
