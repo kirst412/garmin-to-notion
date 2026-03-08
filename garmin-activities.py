@@ -271,14 +271,17 @@ def update_activity(client, existing_activity, new_activity):
     client.pages.update(**update)
 
 def main():
+    print('load dotenv...')
     load_dotenv()
 
+    print('initialize env variables...')
     # Initialize Garmin and Notion clients using environment variables
     garmin_email = os.getenv("GARMIN_EMAIL")
     garmin_password = os.getenv("GARMIN_PASSWORD")
     notion_token = os.getenv("NOTION_TOKEN")
     database_id = os.getenv("NOTION_DB_ID")
 
+    print('initialize garmin client...')
     # Initialize Garmin client and login
     garmin = Garmin(garmin_email, garmin_password)
     garmin.login()
