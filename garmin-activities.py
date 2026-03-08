@@ -343,7 +343,7 @@ def main():
         )
         
         # Check if activity already exists in the fetched activities
-        if (activity_date, activity_name, activity_type) in existing_activities:
+        if (activity_date, activity_name, activity_type) in existing_activities.keys():
             existing_activity = existing_activities[(activity_date, activity_name, activity_type)]
             if activity_needs_update(existing_activity, activity):
                 update_activity(client, existing_activity, activity)
