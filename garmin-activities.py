@@ -254,17 +254,30 @@ def format_date_from_notion(date_to_format):
     return est_time.strftime('%Y-%m-%d %H:%M:%S')
 
 def get_existing_activities(client, database_id):
-    query = client.databases.query(database_id=database_id)
     existing_activities = {}
 
-    # Store activities in a dictionary for easy lookup
-    for result in query['results']:
-        activity_name = result['properties']['Activity Name']['title'][0]['text']['content']
-        activity_date = result['properties']['Date']['date']['start']
-        activity_date = format_date_from_notion(activity_date)
-        activity_type = result['properties']['Activity Type']['select']['name']
+    start_cursor = None
 
-        existing_activities[(activity_date, activity_name, activity_type)] = result
+    while True:
+        response = client.databases.query(
+            database_id=database_id,
+            start_cursor=start_cursor,
+            page_size=100
+        )
+
+        # Store activities in a dictionary for easy lookup
+        for result in response['results']:
+            activity_name = result['properties']['Activity Name']['title'][0]['text']['content']
+            activity_date = result['properties']['Date']['date']['start']
+            activity_date = format_date_from_notion(activity_date)
+            activity_type = result['properties']['Activity Type']['select']['name']
+
+            existing_activities[(activity_date, activity_name, activity_type)] = result
+
+        if not response["has_more"]:
+            break
+
+        start_cursor = response["next_cursor"]
 
     return existing_activities
     
