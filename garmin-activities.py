@@ -173,10 +173,29 @@ def activity_needs_update(existing_activity, new_activity):
         (not has_subactivity)  # If the property doesn't exist, we need an update
     )
 
+def format_activity_date(activity_date):
+    # Ensure the date format is correct
+    # Create GMT timezone object
+    gmt_tz = pytz.timezone('GMT')
+    
+    # Parse the input GMT time string (example format: '2023-03-07T14:30:00Z')
+    gmt_time = datetime.strptime(activity_date, '%Y-%m-%d %H:%M:%S')
+
+    # Localize the GMT time to make it timezone-aware
+    gmt_time = gmt_tz.localize(gmt_time)
+
+    # Create EST timezone object (Eastern Time which handles both EST and EDT)
+    est_tz = pytz.timezone('US/Eastern')
+
+    # Convert the time to EST (this will automatically adjust for DST if needed)
+    est_time = gmt_time.astimezone(est_tz)
+    
+    return est_time.strftime('%Y-%m-%d %H:%M:%S')
+
 def create_activity(client, database_id, activity):
 
     # Create a new activity in the Notion database
-    activity_date = activity.get('startTimeGMT')
+    activity_date = format_activity_date(activity.get('startTimeGMT'))
     activity_name = format_entertainment(activity.get('activityName', 'Unnamed Activity'))
     activity_type, activity_subtype = format_activity_type(
         activity.get('activityType', {}).get('typeKey', 'Unknown'),
@@ -297,7 +316,7 @@ def main():
 
     # Process all activities
     for activity in activities:
-        activity_date = activity.get('startTimeGMT')
+        activity_date = format_activity_date(activity.get('startTimeGMT'))
         activity_name = format_entertainment(activity.get('activityName', 'Unnamed Activity'))
         activity_type, activity_subtype = format_activity_type(
             activity.get('activityType', {}).get('typeKey', 'Unknown'),
