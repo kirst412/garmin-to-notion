@@ -189,13 +189,15 @@ def format_activity_date(activity_date):
 
     # Convert the time to EST (this will automatically adjust for DST if needed)
     est_time = gmt_time.astimezone(est_tz)
+
+    est_time = est_time.replace(second=0)
     
     return est_time.strftime('%Y-%m-%d %H:%M:%S')
 
 def create_activity(client, database_id, activity):
 
     # Create a new activity in the Notion database
-    activity_date = format_activity_date(activity.get('startTimeGMT'))
+    activity_date = activity.get('startTimeGMT')
     activity_name = format_entertainment(activity.get('activityName', 'Unnamed Activity'))
     activity_type, activity_subtype = format_activity_type(
         activity.get('activityType', {}).get('typeKey', 'Unknown'),
@@ -235,6 +237,22 @@ def create_activity(client, database_id, activity):
     
     client.pages.create(**page)
 
+def format_date_from_notion(date_to_format):
+    # Ensure the date format is correct
+    # Create GMT timezone object
+    gmt_tz = pytz.timezone('GMT')
+    
+    # Parse the input GMT time string (example format: '2025-06-03T22:38:00.000+00:00'')
+    gmt_time = datetime.strptime(date_to_format, '%Y-%m-%dT%H:%M:%S.%f%z')
+
+    # Create EST timezone object (Eastern Time which handles both EST and EDT)
+    est_tz = pytz.timezone('US/Eastern')
+
+    # Convert the time to EST (this will automatically adjust for DST if needed)
+    est_time = gmt_time.astimezone(est_tz)
+    
+    return est_time.strftime('%Y-%m-%d %H:%M:%S')
+
 def get_existing_activities(client, database_id):
     query = client.databases.query(database_id=database_id)
     existing_activities = {}
@@ -243,6 +261,7 @@ def get_existing_activities(client, database_id):
     for result in query['results']:
         activity_name = result['properties']['Activity Name']['title'][0]['text']['content']
         activity_date = result['properties']['Date']['date']['start']
+        activity_date = format_date_from_notion(activity_date)
         activity_type = result['properties']['Activity Type']['select']['name']
 
         existing_activities[(activity_date, activity_name, activity_type)] = result
