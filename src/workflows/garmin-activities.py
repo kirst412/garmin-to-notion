@@ -267,7 +267,7 @@ def create_activity(notion_client: NotionClient, database_id: str, activity: dic
     if icon_url:
         page["icon"] = {"type": "external", "external": {"url": icon_url}}
     
-    client.pages.create(**page)
+    notion_client.pages.create(**page)
 
 def format_date_from_notion(date_to_format):
     # Ensure the date format is correct
@@ -377,7 +377,7 @@ def main():
 
     # Get all activities
     print('Fetching all activities from garmin...')
-    activities = get_all_activities(garmin)
+    activities = get_all_activities(garmin_client)
 
     # Process all activities
     for activity in activities:
@@ -395,7 +395,7 @@ def main():
                 update_activity(notion_client, existing_activity, activity)
                 print(f"Updated: {activity_type} - {activity_name}")
         else:
-            create_activity(notion, database_id, activity)
+            create_activity(notion_client, database_id, activity)
             print(f"Created: {activity_type} - {activity_name}")
 
 
