@@ -223,8 +223,6 @@ def format_activity_date(activity_date):
     
     return est_time.strftime('%Y-%m-%d %H:%M:%S')
 
-def create_activity(client, database_id, activity):
-
 def create_activity(notion_client: NotionClient, database_id: str, activity: dict) -> None:
     # Create a new activity in the Notion database
     activity_date = activity.get('startTimeGMT')
@@ -316,8 +314,6 @@ def get_existing_activities(client, database_id):
 
     return existing_activities
     
-def update_activity(client, existing_activity, new_activity):
-
 def update_activity(notion_client: NotionClient, existing_activity: dict, new_activity: dict) -> None:
     # Update an existing activity in the Notion database with new data
     activity_name = new_activity.get('activityName', 'Unnamed Activity')
