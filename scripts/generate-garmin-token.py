@@ -4,12 +4,25 @@
 # ///
 import getpass
 import pathlib
+import warnings
 
 from garminconnect import Garmin
 
+email = input("Garmin email: ")
+
+try:
+    with warnings.catch_warnings():
+        warnings.simplefilter("error", getpass.GetPassWarning)
+        password = getpass.getpass("Garmin password: ")
+except getpass.GetPassWarning as error:
+    raise SystemExit(
+        "Cannot securely read your password in this console. "
+        "Run this script from a terminal that supports hidden password input."
+    ) from error
+
 client = Garmin(
-    input("Garmin email: "),
-    getpass.getpass("Garmin password: "),
+    email,
+    password,
     prompt_mfa=lambda: input("MFA code: "),
 )
 client.login("~/.garminconnect")

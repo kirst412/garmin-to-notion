@@ -1,8 +1,12 @@
+import sys
 from datetime import date, timedelta
+from pathlib import Path
 
 from dotenv import load_dotenv
 
-from src.helpers import get_garmin_client, get_notion_client
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+
+from src.helpers import get_garmin_client, get_notion_client, query_database
 
 
 def get_all_daily_steps(garmin):
@@ -24,8 +28,9 @@ def daily_steps_exist(client, database_id, activity_date):
     """
     Check if daily step count already exists in the Notion database.
     """
-    query = client.databases.query(
-        database_id=database_id,
+    query = query_database(
+        client,
+        database_id,
         filter={
             "and": [
                 {"property": "Date", "date": {"equals": activity_date}},

@@ -25,6 +25,10 @@ You will be prompted for:
 Once complete, the script will print your token between two lines of `=` signs.
 **Copy the entire JSON block** — everything from the opening `{` to the closing `}`, inclusive.
 
+If password characters appear while typing, press `Ctrl+C` and rerun the command in a terminal that supports hidden
+password input, such as a regular PowerShell or Windows Terminal session. The script will stop rather than accept an
+echoed password.
+
 > **Getting a 429 error?** Garmin blocks certain IP ranges (VPNs, corporate networks, some ISPs) on their login
 > endpoint. If this happens, try
 > * disabling your VPN.

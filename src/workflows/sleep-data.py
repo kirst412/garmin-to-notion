@@ -1,9 +1,13 @@
+import sys
 from datetime import datetime
+from pathlib import Path
 
 import pytz
 from dotenv import load_dotenv, dotenv_values
 
-from src.helpers import get_garmin_client, get_notion_client
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+
+from src.helpers import get_garmin_client, get_notion_client, query_database
 
 # Constants
 local_tz = pytz.timezone("America/Toronto")
@@ -42,8 +46,9 @@ def format_date_for_name(sleep_date):
 
 
 def sleep_data_exists(client, database_id, sleep_date):
-    query = client.databases.query(
-        database_id=database_id,
+    query = query_database(
+        client,
+        database_id,
         filter={"property": "Long Date", "date": {"equals": sleep_date}}
     )
     results = query.get('results', [])

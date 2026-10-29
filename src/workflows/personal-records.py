@@ -1,8 +1,12 @@
+import sys
+from pathlib import Path
 from typing import Any
 
 from dotenv import load_dotenv
 
-from src.helpers import get_garmin_client, get_notion_client
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+
+from src.helpers import get_garmin_client, get_notion_client, query_database
 
 
 def get_icon_for_record(activity_name):
@@ -188,8 +192,9 @@ def replace_activity_name_by_typeId(typeId):
 
 
 def get_existing_record(client, database_id, activity_name):
-    query = client.databases.query(
-        database_id=database_id,
+    query = query_database(
+        client,
+        database_id,
         filter={
             "and": [
                 {"property": "Record", "title": {"equals": activity_name}},
@@ -201,8 +206,9 @@ def get_existing_record(client, database_id, activity_name):
 
 
 def get_record_by_date_and_name(client, database_id, activity_date, activity_name):
-    query = client.databases.query(
-        database_id=database_id,
+    query = query_database(
+        client,
+        database_id,
         filter={
             "and": [
                 {"property": "Record", "title": {"equals": activity_name}},

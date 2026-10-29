@@ -1,11 +1,15 @@
+import sys
 from datetime import datetime, UTC, timedelta
+from pathlib import Path
 
 import pytz
 from dotenv import load_dotenv
 from garminconnect import Garmin as GarminClient
 from notion_client import Client as NotionClient
 
-from src.helpers import get_garmin_client, get_notion_client
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+
+from src.helpers import get_garmin_client, get_notion_client, query_database
 
 # Your local time zone, replace with the appropriate one if needed
 local_tz = pytz.timezone('America/Toronto')
@@ -138,8 +142,9 @@ def activity_exists(
     lookup_min_date = activity_date - timedelta(minutes=5)
     lookup_max_date = activity_date + timedelta(minutes=5)
 
-    query = notion_client.databases.query(
-        database_id=database_id,
+    query = query_database(
+        notion_client,
+        database_id,
         filter={
             "and": [
                 {"property": "Date", "date": {"on_or_after": lookup_min_date.isoformat()}},
@@ -288,8 +293,9 @@ def get_existing_activities(client, database_id):
     start_cursor = None
 
     while True:
-        response = client.databases.query(
-            database_id=database_id,
+        response = query_database(
+            client,
+            database_id,
             start_cursor=start_cursor,
             page_size=100
         )
